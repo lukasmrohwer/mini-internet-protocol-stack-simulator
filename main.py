@@ -20,7 +20,7 @@ def main():
     host_b = Host("Host B", HOST_B_IP, HOST_B_MAC)
     router_r1 = Router("Router R1")
 
-    host_a.application_send(data, None, None)
+    host_a.application_send(data, 5000, 80)
 
 if __name__ == "__main__":
     main()

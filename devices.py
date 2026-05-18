@@ -16,7 +16,7 @@ class Host:
     def transport_send(self, data, src_port, dst_port):
         print(f"{self.name}: Layer 4: Data received from Application Layer. Data size={len(data)}")
         
-        segment = Segment(src_port, dst_port, 0x0800, self.sequence_number, data)
+        segment = Segment(src_port, dst_port, 0, self.sequence_number, data)
         print(f"{self.name}: Layer 4: Checksum computed")
         print(f"{self.name}: Layer 4: Segment created by adding transport layer header (DATA, seq={self.sequence_number}) (encapsulation)")
 
@@ -34,18 +34,18 @@ class Host:
                     return
         self.log(f"{self.name}: Layer 4: Checksum verified")
 
-        if segment.type == 0x0800:
+        if segment.type == 0:
             if segment.seq_num == self.expected_seq_num:
                 print(f"{self.name}: Layer 4: DATA segment delivered to Application Layer. Data size={segment.length}")
                 self.expected_seq_num = 1 - self.expected_seq_num
 
-            ack_segment = Segment(None, None, 0x0806, segment.sequence_number, "")
+            ack_segment = Segment(None, None, 1, segment.sequence_number, "")
             print(f"{self.name}: Layer 4: Segment created by adding transport layer header (ACK, seq={ack_segment.length})")
 
             self.network_send(ack_segment)
             print(f"{self.name}: Layer 4: Segment sent to Network Layer")
 
-        elif segment.type == 0x0806:
+        elif segment.type == 1:
             print(f"{self.name}: Layer 4: ACK received: seq=0")
             if segment.sequence_num == self.sequence_num:
                 self.waiting_for_ack = False
@@ -53,8 +53,10 @@ class Host:
                 print(f"{self.name}: Layer 4: Segment retransmitted due to incorrect ACK")
 
 
-
     def network_send(self, data, dst_ip, dst_port):
+        pass
+
+    def network_receive(self):
         pass
 
     def link_send(self, data, dst_ip, dst_port):
