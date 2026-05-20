@@ -6,13 +6,13 @@ class Host:
         self.name = name
         self.ip = ip
         self.mac = mac
-        self.routingTable = routing_table       # maps destination network -> {next_hop, interface}
-        self.arpTable = arp_table               # maps next-hop IP -> MAC address
-        self.sequenceNumber = 0                 # current seq number for sending (alternates 0/1)
-        self.expectedSeqNum = 0                 # seq number we expect to receive next
-        self.waitingForAck = False              # rdt2.2: are we waiting for an ACK right now?
+        self.routingTable = routing_table       
+        self.arpTable = arp_table               
+        self.sequenceNumber = 0                 
+        self.expectedSeqNum = 0                 
+        self.waitingForAck = False              
         self.router = None    
-        self.macTable = {}                  # reference to Router R1, set after creation in main.py
+        self.macTable = {}                  
 
     # --- Application Layer Interface ---
 
@@ -129,7 +129,7 @@ class Host:
         self.macTable[frame.src_mac] = True
 
         print(f"{self.name}: Layer 2: Source MAC learned: {frame.src_mac}")
-        print(f"{self.name}: Layer 2: Packet delievered to Network Layer")
+        print(f"{self.name}: Layer 2: Packet delivered to Network Layer")
 
         self.network_receive(frame.payload)
 
@@ -137,13 +137,12 @@ class Host:
 class Router:
     def __init__(self, name, routing_table, arp_table):
         self.name = name
-        self.routingTable = routing_table       # maps destination network -> {next_hop, interface}
-        self.arpTable = arp_table               # maps next-hop IP -> MAC address
-        self.macTable = {}                      # learned MACs: {mac_address: interface} (starts empty)
-        self.hostA = None                       # reference to Host A, set after creation in main.py
-        self.hostB = None                       # reference to Host B, set after creation in main.py
+        self.routingTable = routing_table       
+        self.arpTable = arp_table               
+        self.macTable = {}                      
+        self.hostA = None                       
+        self.hostB = None                       
 
-        # Each interface has its own IP and MAC
         self.interfaces = {
             "Interface 1": {"ip": ROUTER_R1_INT1_IP, "mac": ROUTER_R1_INT1_MAC},
             "Interface 2": {"ip": ROUTER_R1_INT2_IP, "mac": ROUTER_R1_INT2_MAC},
@@ -152,21 +151,61 @@ class Router:
     # --- Layer 2: Data Link ---
 
     def link_receive(self, frame, interface):
-        # Receives a Frame on a given interface
-        # Logs receipt, learns source MAC, strips frame, passes payload to network_receive
-        pass
+        print(f"{self.name}: Layer 2: Frame received on {interface}")
 
-    def link_send(self, packet, next_hop_ip, out_interface):
-        # Looks up next_hop_ip in arp_table to get destination MAC
-        # Uses out_interface to pick the correct source MAC
-        # Wraps packet in a Frame, hands frame to the correct host (host_a or host_b)
-        pass
+        self.macTable[frame.src_mac] = interface
+
+        print(f"{self.name}: Layer 2: Source MAC learned: {frame.src_mac} on {interface}")
+        print(f"{self.name}: Layer 2: Packet delivered to Network Layer")
+
+        self.network_receive(frame.payload)
+
+    def link_send(self, packet, nextHop, outInterface):
+        dstMac = self.arpTable[nextHop] 
+        srcMac = self.interfaces[outInterface]["mac"]
+
+        print(f"{self.name}: Layer 2: Packet received from Network Layer")
+        print(f"{self.name}: Layer 2: Destination MAC lookup for next-hop IP ({nextHop}) → {dstMac}")
+        print(f"{self.name}: Layer 2: Frame created: SRC_MAC={srcMac}, DST_MAC={dstMac}")
+        print(f"{self.name}: Layer 2: Frame forwarded on {outInterface}")
+
+        frame = Frame(self.mac, dstMac, "0x0800", packet.total_length, packet)
+
+        if outInterface == "Interface 1":
+            self.hostA.link_receive(frame)
+        else:
+            self.hostB.link_receive(frame)
 
     # --- Layer 3: Network ---
 
     def network_receive(self, packet):
-        # Receives a Packet from link_receive
-        # Logs receipt, reads destination IP, decrements TTL (drops if 0)
-        # Looks up routing table to find next_hop and out_interface
-        # Passes packet down to link_send
-        pass
+        print(f"{self.name}: Layer 3: Packet received from Data Link Layer: SRC_IP={packet.src_ip}, DST_IP={packet.dst_ip}, TTL={packet.ttl}")
+        print(f"{self.name}: Layer 3: Destination IP read: {packet.dst_ip}")
+
+        oldTtl = packet.ttl
+        packet.ttl -= 1
+
+        if packet.ttl == 0:
+            print(f"{self.name}: Layer 3: TTL hit 0")
+            return
+        
+        print(f"{self.name}: Layer 3: TTL decremented: {oldTtl} → {packet.ttl}")
+
+        dstArr = packet.dst_ip.split(".")[:3]
+        dstPrefix = str(dstArr[0]) + "." + str(dstArr[1]) + "." + str(dstArr[2])
+
+        route = self.routingTable[dstPrefix]
+
+        if route["next_hop"] != None:
+            nextHop = route["next_hop"]
+        else:
+            nextHop = packet.dst_ip
+
+        interface = route["interface"]
+
+        print(f"{self.name}: Layer 3: Routing table lookup performed")
+        print(f"{self.name}: Layer 3: Next-hop IP determined: {nextHop}")
+        print(f"{self.name}: Layer 3: Outgoing interface selected ({interface})")
+        print(f"{self.name}: Layer 3: Packet forwarded to Data Link Layer")
+
+        self.link_send(packet, nextHop, interface)
