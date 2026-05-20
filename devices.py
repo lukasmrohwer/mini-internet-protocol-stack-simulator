@@ -9,11 +9,12 @@ class Host:
         self.sequence_number = 0
         self.expected_seq_num = 0
         self.waiting_for_ack = False
+        self.routing_table = {}
 
-    def application_send(self, data, src_port, dst_port):
+    def application_send(self, data, src_port, dst_port, dst_ip):
         self.transport_send(data, src_port, dst_port)
 
-    def transport_send(self, data, src_port, dst_port):
+    def transport_send(self, data, src_port, dst_port, dst_ip):
         print(f"{self.name}: Layer 4: Data received from Application Layer. Data size={len(data)}")
         
         segment = Segment(src_port, dst_port, 0, self.sequence_number, data)
@@ -22,12 +23,12 @@ class Host:
 
         self.waiting_for_ack = True
         while self.waiting_for_ack:
-            self.network_send(segment)
+            self.network_send(segment, dst_ip)
             print(f"{self.name}: Layer 4: Segment sent to Network Layer")
         self.sequence_number = 1 - self.sequence_number
 
 
-    def transport_receive(self, segment):
+    def transport_receive(self, segment, dst_ip):
         print(f"{self.name}: Layer 4: Segment received from Network Layer")
         if not segment.verify_checksum():
                     self.log(4, "Segment discarded due to checksum error")
@@ -54,7 +55,9 @@ class Host:
 
 
     def network_send(self, data, dst_ip, dst_port):
-        pass
+        print(f"{self.name}: Layer 3: Segment received from Transport Layer: SRC_IP={self.ip}, DST_IP={dst_ip}, TTL=100")
+        print(f"{self.name}: Layer 3: Destination IP read: {dst_ip}")
+        print(f"{self.name}: Layer 3: Routing table lookup performed")
 
     def network_receive(self):
         pass
