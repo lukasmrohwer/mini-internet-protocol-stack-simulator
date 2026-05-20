@@ -16,9 +16,6 @@ This is a simplified network simulator designed to demonstrate data is delivered
 Transport Layer
 The transport layer receives the data from the application and is segmented into UDP-like segments of length up to 500 bytes. The segment includes port numbers to identify sending and receiving applications, the data itself along with the length of the segment and its type, and the checksum of the segment along with a sequence number used for error detection.
 
-data segmentation, error detection, data transfer
-
-
 ## Usage
 
 To run the simulator, you need to execute `main.py` and provide the application message size as a command-line argument. The message size is the length of the message in bytes that Host A will send to Host B (e.g. 100 for a 100-byte message).
