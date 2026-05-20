@@ -1,6 +1,6 @@
 # a main entry file main.py (which is the only file called for execution)
 import sys
-from devices_new import Host, Router
+from devices import Host, Router
 from config import *
 
 def main():
