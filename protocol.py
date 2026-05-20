@@ -11,11 +11,17 @@ class Segment:
         self.data = data
 
     def calculate_checksum(self, data):
-        return 1
+        total = 0
+        for c in data:
+            total += ord(c)
+
+        return (total % 65536)
 
     def verify_checksum(self):
-        return True
-
+        if self.calculate_checksum(self.data) == self.checksum:
+            return True
+        return False
+    
 class Packet:
     def __init__(self, src_ip, dst_ip, ttl, protocol, total_length, payload):
         self.src_ip = src_ip

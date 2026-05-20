@@ -31,24 +31,24 @@ class Host:
     def transport_receive(self, segment, dst_ip):
         print(f"{self.name}: Layer 4: Segment received from Network Layer")
         if not segment.verify_checksum():
-                    self.log(4, "Segment discarded due to checksum error")
+                    print(f"{self.name}: Layer 4: Segment discarded due to checksum error")
                     return
-        self.log(f"{self.name}: Layer 4: Checksum verified")
+        print(f"{self.name}: Layer 4: Checksum verified")
 
         if segment.type == 0:
-            if segment.seq_num == self.expected_seq_num:
-                print(f"{self.name}: Layer 4: DATA segment delivered to Application Layer. Data size={segment.length}")
+            if segment.sequence_number == self.expected_seq_num:
+                print(f"{self.name}: Layer 4: DATA segment delivered to Application Layer. Data size={len(segment.data)}")
                 self.expected_seq_num = 1 - self.expected_seq_num
 
             ack_segment = Segment(None, None, 1, segment.sequence_number, "")
-            print(f"{self.name}: Layer 4: Segment created by adding transport layer header (ACK, seq={ack_segment.length})")
+            print(f"{self.name}: Layer 4: Segment created by adding transport layer header (ACK, seq={ack_segment.sequence_number})")
 
             self.network_send(ack_segment)
             print(f"{self.name}: Layer 4: Segment sent to Network Layer")
 
         elif segment.type == 1:
-            print(f"{self.name}: Layer 4: ACK received: seq=0")
-            if segment.sequence_num == self.sequence_num:
+            print(f"{self.name}: Layer 4: ACK received: seq={segment.sequence_number}")
+            if segment.sequence_number == self.sequence_number:
                 self.waiting_for_ack = False
             else:
                 print(f"{self.name}: Layer 4: Segment retransmitted due to incorrect ACK")
@@ -59,7 +59,7 @@ class Host:
         print(f"{self.name}: Layer 3: Destination IP read: {dst_ip}")
         print(f"{self.name}: Layer 3: Routing table lookup performed")
 
-    def network_receive(self):
+    def network_receive(self, segment):
         pass
 
     def link_send(self, data, dst_ip, dst_port):
