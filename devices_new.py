@@ -169,7 +169,7 @@ class Router:
         print(f"{self.name}: Layer 2: Frame created: SRC_MAC={srcMac}, DST_MAC={dstMac}")
         print(f"{self.name}: Layer 2: Frame forwarded on {outInterface}")
 
-        frame = Frame(self.mac, dstMac, "0x0800", packet.total_length, packet)
+        frame = Frame(srcMac, dstMac, "0x0800", packet.total_length, packet)
 
         if outInterface == "Interface 1":
             self.hostA.link_receive(frame)
