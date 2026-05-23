@@ -1,4 +1,3 @@
-# a main entry file main.py (which is the only file called for execution)
 import sys
 from devices import Host, Router
 from config import *

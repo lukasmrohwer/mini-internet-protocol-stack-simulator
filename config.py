@@ -1,8 +1,8 @@
-# a config.py file defining fixed parameters such as IP addresses, MAC addresses, and routing tables
-
+# network subnets
 NETWORK_1 = "10.0.1.0/24"
 NETWORK_2 = "10.0.2.0/24"
 
+# ip and mac addresses for the hosts and router interfaces
 HOST_A_IP = "10.0.1.10"
 HOST_B_IP = "10.0.2.20"
 
@@ -15,6 +15,7 @@ ROUTER_R1_INT2_IP = "10.0.2.1"
 ROUTER_R1_INT1_MAC = "BB:BB:BB:BB:BB:BB"
 ROUTER_R1_INT2_MAC = "CC:CC:CC:CC:CC:CC"
 
+# routing and arp tables for the hosts and router
 HOST_A_ROUTING_TABLE = {
     "10.0.1": {"next_hop": None, "interface": "Interface 1"},
     "10.0.2": {"next_hop": "10.0.1.1", "interface": "Interface 1"},

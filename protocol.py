@@ -1,5 +1,3 @@
-# a protocol.py file containing the header definitions and classes for Layers 2, 3, and 4
-
 class Segment:
     def __init__(self, src_port, dst_port, type, sequence_number, data, checksum):
         self.src_port = src_port
