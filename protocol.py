@@ -47,11 +47,34 @@ class TransportLayer(Layer):
         return payloads
 
     def calculate_checksum(self, data):
-        total = 0
-        for c in data:
-            total += ord(c)
+        """
+        This function calculates the UDP checksum for the data given the algorithm specified in Week 8's lecture slides.
+        """
+        # Convert string to bytes (handles standard ASCII/UTF-8 encoding)
+        if isinstance(data, str):
+            data = data.encode('utf-8')
+            
+        # Pad with a zero byte if the length is odd to make even 16-bit words
+        if len(data) % 2 != 0:
+            data += b'\x00'
 
-        return (total % 65536)
+        total = 0
+        
+        # Treat segment contents as a sequence of 16-bit integers
+        for i in range(0, len(data), 2):
+            # Shift the first byte 8 bits left, add the second byte (Big-Endian)
+            word = (data[i] << 8) + data[i+1]
+            total += word
+
+        # Handle carryout wraparound
+        # Add any overflow beyond 16 bits back into the sum
+        while (total >> 16) > 0:
+            total = (total & 0xFFFF) + (total >> 16)
+
+        # Take the 1s complement of the sum and mask to 16 bits
+        checksum = ~total & 0xFFFF
+
+        return checksum
 
     def verify_checksum(self, segment):
         if self.calculate_checksum(segment.data) == segment.checksum:
