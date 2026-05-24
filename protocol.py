@@ -106,6 +106,7 @@ class TransportLayer(Layer):
             # retransmit the segment until the correct ACK is received
             while self.node.waitingForAck:
                 print(f"{self.node.name}: Layer 4: Segment sent to Network Layer")
+                print("")
                 self.node.NetworkLayer.send(segment, dst_ip)
 
             # alternate sequence number between 0 and 1 (alternating bit protocol)
@@ -132,6 +133,7 @@ class TransportLayer(Layer):
             ackSegment = Segment(None, None, 1, segment.sequence_number, "", ackChecksum)
             print(f"{self.node.name}: Layer 4: Segment created by adding transport layer header (ACK, seq={ackSegment.sequence_number})")
             print(f"{self.node.name}: Layer 4: Segment sent to Network Layer")
+            print("")
             self.node.NetworkLayer.send(ackSegment, src_ip)
 
         else:
@@ -168,6 +170,7 @@ class NetworkLayer(Layer):
         totalLength = segment.length + 12   # segment length plus 12-byte IP header
         packet = Packet(self.node.ip, dst_ip, 100, 17, totalLength, segment)
 
+        print("")
         self.node.LinkLayer.send(packet, nextHop, interface)
 
     def receive(self, packet):
@@ -179,6 +182,7 @@ class NetworkLayer(Layer):
             # packet has reached its destination — hand payload up to Transport Layer
             print(f"{self.node.name}: Layer 3: Packet identified as local delivery")
             print(f"{self.node.name}: Layer 3: Segment delivered to Transport Layer")
+            print("")
             self.node.TransportLayer.receive(packet.payload, packet.src_ip)
         else:
             oldTtl = packet.ttl
@@ -209,6 +213,7 @@ class NetworkLayer(Layer):
             print(f"{self.node.name}: Layer 3: Outgoing interface selected ({interface})")
             print(f"{self.node.name}: Layer 3: Packet forwarded to Data Link Layer")
 
+            print("")
             self.node.LinkLayer.send(packet, nextHop, interface)
 
 class LinkLayer(Layer):
@@ -238,10 +243,13 @@ class LinkLayer(Layer):
         # deliver the frame directly to the connected device (simulates the physical link)
         if hasattr(self.node, "interfaces"):
             if outInterface == "Interface 1":
+                print("")
                 self.node.hostA.link_receive(frame)
             else:
+                print("")
                 self.node.hostB.link_receive(frame)
         else:
+            print("")
             self.node.router.link_receive(frame, outInterface)
 
     def receive(self, frame, interface=None):
@@ -258,4 +266,5 @@ class LinkLayer(Layer):
             print(f"{self.node.name}: Layer 2: Source MAC learned: {frame.src_mac}")
 
         print(f"{self.node.name}: Layer 2: Packet delivered to Network Layer")
+        print("")
         self.node.NetworkLayer.receive(frame.payload)
