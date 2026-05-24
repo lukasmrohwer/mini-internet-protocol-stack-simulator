@@ -1,20 +1,18 @@
 # Mini Internet Protocol Stack Simulator
 
+Lukas Rohwer (24215157), Harrison Chambers (24328083)
+
 This is a simplified network simulator designed to demonstrate data is delivered between hosts through layer 2, 3 and 4 of the OSI model.
 
 ## Implementation Explanation
 
-### Project Structure
+`main.py` is the main entry file, which is invoked from the command line along with an argument: an integer representing the size of the message in bytes. This file initiates the host and router objects representing devices in the network and begins the delivery of data from host A to host B.
 
-- **`devices.py`**: Implements the `Host` and `Router` classes containing the core logic for the different networking layers.
-- **`protocol.py`**: Defines the header definitions and classes used for encapsulation: `Segment` (Layer 4), `Packet` (Layer 3), and `Frame` (Layer 2).
-- **`config.py`**: Stores the fixed parameters for  IP addresses, MAC addresses, ARP tables, and routing tables for all devices.
-- **`main.py`**: The main entry point of the simulation. It initializes the network devices (Host A, Host B, and Router R1), connects them, and initiates the data transmission.
+`config.py` defines fixed parameters used in the simulation, including the IP addresses and MAC addresses of the devices, the routing tables used by the network layer, and ARP tables used by the link layer.
 
-### Layer Breakdown
+`devices.py` defines the Host and Router classes, including information about each, including their IP address, MAC address, router tables, their respective layer objects, as well as functions for receiving information from the application layer or the network. These are the classes defining the objects created in main.py. 
 
-Transport Layer
-The transport layer receives the data from the application and is segmented into UDP-like segments of length up to 500 bytes. The segment includes port numbers to identify sending and receiving applications, the data itself along with the length of the segment and its type, and the checksum of the segment along with a sequence number used for error detection.
+`protocol.py` contains the class definitions for the protocol headers Segment, Packet, and Frame, as well as the classes for Layers 2, 3, and 4 of the OSI model. Each layer class defines a function for sending and receiving data, passing it up or down the stack to the next layer.
 
 ## Usage
 
