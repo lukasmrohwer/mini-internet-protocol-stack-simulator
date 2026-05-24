@@ -37,7 +37,7 @@ class TransportLayer(Layer):
     def segment_data(self, data):
         """This function splits data into chunks of at most 500 bytes to fit within a single segment payload."""
         payloads = []
-        i = 0w
+        i = 0
 
         while i < len(data):
             if len(data) > i + 500:
