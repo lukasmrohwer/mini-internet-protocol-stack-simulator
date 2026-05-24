@@ -1,4 +1,3 @@
-from protocol import TransportLayer
 from protocol import *
 from config import *
 
